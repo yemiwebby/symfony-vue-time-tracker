@@ -22,9 +22,15 @@ class Project
     private $name;
 
     /**
-     * @ORM\Column(type="integer", name="user_id")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="project")
+     * @ORM\JoinColumn(nullable=true)
      */
-    private $userId;
+    private $user;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Timer", mappedBy="project")
+     */
+    private $timers;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
@@ -35,4 +41,102 @@ class Project
      * @ORM\Column(type="datetime", name="updated_at")
      */
     private $updatedAt;
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param mixed $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser(User $user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTimers()
+    {
+        return $this->timers;
+    }
+
+    /**
+     * @param mixed $timers
+     */
+    public function setTimers($timers)
+    {
+        $this->timers = $timers;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param mixed $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param mixed $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
 }
