@@ -233,7 +233,8 @@ class User implements UserInterface, \Serializable
 
     public function serialize()
     {
-        return $this->serialize(array(
+//        return $this->serialize(array(
+        return serialize(array(
             $this->id,
             $this->username,
             $this->password,
@@ -247,7 +248,8 @@ class User implements UserInterface, \Serializable
             $this->id,
             $this->username,
             $this->password,
-            ) = $this->unserialize($serialized);
+            ) = unserialize($serialized);
+//            ) = $this->unserialize($serialized);
     }
 
 }

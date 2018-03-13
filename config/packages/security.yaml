@@ -15,7 +15,7 @@ security:
         main:
 #            pattern: ^/
             anonymous: ~
-            http_basic: ~
+#            http_basic: ~
             provider: our_db_provider
 #            anonymous: true
 
@@ -27,8 +27,12 @@ security:
             form_login:
                   login_path: login
                   check_path: login
-                  default_target_path: home
-
+                  default_target_path: /home
+#        secured_area:
+#            anonymous: ~
+            logout:
+                path: /logout
+                target: /
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

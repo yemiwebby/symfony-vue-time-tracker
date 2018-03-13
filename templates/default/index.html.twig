@@ -7,11 +7,13 @@
 {% block body %}
 
 <div class="example-wrapper">
-    <h1>Hello </h1>
+    <div class="jumbotron text-center">
+        <h2> Projects Time Tracker built with Symfony and Vue </h2>
 
-    <home></home>
-
-    This friendly message is coming from:
-
+        <div>
+            <a href="{{ path('login') }}" class="btn btn-default">Login</a>
+            <a href="{{ path('user_registration') }}" class="btn btn-default">Register</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

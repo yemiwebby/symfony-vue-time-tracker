@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello {{ controller_name }}!{% endblock %}
+{% block title %}Symfony Time Tracker {% endblock %}
 
 {% block body %}
 <style>
@@ -17,4 +17,13 @@
         <li>Your template at <code>templates/home/index.html.twig</code></li>
     </ul>
 </div>
+
+    <div>
+        <home></home>
+    </div>
+
+
+    <div>
+        <a href="{{ path('logout') }}" class="btn btn-default">Logout</a>
+    </div>
 {% endblock %}
