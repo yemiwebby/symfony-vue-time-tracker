@@ -26,10 +26,10 @@
                             <li v-for="timer in project.timers" :key="timer.id" class="list-group-item clearfix">
                                 <strong class="timer-name">{{ timer.name }}</strong>
                                 <div class="pull-right">
-                                        <span v-if="showTimerForProject(project, timer)" style="margin-right: 10px">
+                                        <span v-if="showTimerForProject(project, timer)" class="show-timer-for-project">
                                             <strong>{{ activeTimerString }}</strong>
                                         </span>
-                                    <span v-else style="margin-right: 10px">
+                                    <span v-else>
                                             <strong>{{ calculateTimeSpent(timer) }}</strong>
                                         </span>
                                     <button v-if="showTimerForProject(project, timer)" class="btn btn-sm btn-danger" @click="stopTimer()">
@@ -104,9 +104,9 @@
             }
         },
         created() {
-            window.axios.get('/projects').then(response => {
+            axios.get('/projects').then(response => {
                 this.projects = response.data
-                window.axios.get('/project/timers/active').then(response => {
+                axios.get('/project/timers/active').then(response => {
                     if (response.data.id !== undefined) {
                         this.startTimer(response.data.project, response.data)
                     }
@@ -176,7 +176,7 @@
              * Stop the timer from the API and then from the local counter.
              */
             stopTimer: function () {
-                window.axios.post(`/projects/${this.counter.timer.id}/timers/stop`)
+                axios.post(`/projects/${this.counter.timer.id}/timers/stop`)
                     .then(response => {
                         // Loop through the projects and get the right project...
                         this.projects.forEach(project => {
@@ -203,7 +203,7 @@
              * Create a new timer.
              */
             createTimer: function (project) {
-                window.axios.post(`/projects/${project.id}/timers`, {name: this.newTimerName})
+                axios.post(`/projects/${project.id}/timers`, {name: this.newTimerName})
                     .then(response => {
                         project.timers.push(response.data)
                         this.startTimer(response.data.project, response.data)
@@ -216,7 +216,7 @@
              * Create a new project.
              */
             createProject: function () {
-                window.axios.post('/projects', {name: this.newProjectName})
+                axios.post('/projects/create', {name: this.newProjectName})
                     .then(response => this.projects.push(response.data))
 
                 this.newProjectName = ''
@@ -224,3 +224,9 @@
         },
     }
 </script>
+
+<style scoped>
+    #show-timer-for-project {
+        margin-right: 10px
+    }
+</style>

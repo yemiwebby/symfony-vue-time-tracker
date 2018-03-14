@@ -17,7 +17,7 @@ class Timer
     private $id;
 
     /**
-     * @ORM\Column(type="string", name="name")
+     * @ORM\Column(type="string", name="name", length=100)
      */
     private $name;
 
