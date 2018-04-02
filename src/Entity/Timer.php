@@ -39,7 +39,7 @@ class Timer
     private $startedAt;
 
     /**
-     * @ORM\Column(type="datetime", name="stopped_at")
+     * @ORM\Column(type="datetime", name="stopped_at", nullable=true)
      */
     private $stoppedAt;
 

@@ -19,16 +19,13 @@ class TimerRepository extends ServiceEntityRepository
         parent::__construct($registry, Timer::class);
     }
 
-    /*
-    public function findBySomething($value)
+    public function findRunningTimer($user)
     {
         return $this->createQueryBuilder('t')
-            ->where('t.something = :value')->setParameter('value', $value)
-            ->orderBy('t.id', 'ASC')
-            ->setMaxResults(10)
+            ->where('t.user = :user')
+            ->andWhere('t.stoppedAt is NULL')
+            ->setParameter('user', $user)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getOneOrNullResult();
     }
-    */
 }

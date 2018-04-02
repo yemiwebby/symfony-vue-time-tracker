@@ -74,13 +74,6 @@ class Project
         $this->name = $name;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUser(): User
-    {
-        return $this->user;
-    }
 
     /**
      * @param mixed $user
@@ -93,6 +86,7 @@ class Project
     /**
      * @return mixed
      */
+
     public function getTimers()
     {
         return $this->timers;
@@ -137,6 +131,12 @@ class Project
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function __toString()
+    {
+        // TODO: Implement __toString() method.
+        return $this->name;
     }
 
 }

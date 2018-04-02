@@ -26,7 +26,7 @@
                             <li v-for="timer in project.timers" :key="timer.id" class="list-group-item clearfix">
                                 <strong class="timer-name">{{ timer.name }}</strong>
                                 <div class="pull-right">
-                                        <span v-if="showTimerForProject(project, timer)" class="show-timer-for-project">
+                                        <span v-if="showTimerForProject(project, timer)" style="margin-right: 10px">
                                             <strong>{{ activeTimerString }}</strong>
                                         </span>
                                     <span v-else>
@@ -38,7 +38,10 @@
                                 </div>
                             </li>
                         </ul>
-                        <p v-else>Nothing has been recorded for "{{ project.name }}". Click the play icon to record.</p>
+                        <p v-else>
+                            No task has been recorded for <b>"{{ project.name }}"</b> yet.
+                            Click the plus icon to add task and then, the play icon to start recording.
+                        </p>
                     </div>
                 </div>
                 <!-- Create Timer Modal -->
@@ -51,7 +54,7 @@
                             </div>
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <input v-model="newTimerName" type="text" class="form-control" id="usrname" placeholder="What are you working on?">
+                                    <input v-model="newTimerName" type="text" class="form-control" id="username" placeholder="What are you working on?">
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -72,14 +75,14 @@
                             <button type="button" class="close" data-dismiss="modal">×</button>
                             <h4 class="modal-title">New Project</h4>
                         </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <input v-model="newProjectName" type="text" class="form-control" id="usrname" placeholder="Project Name">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <input v-model="newProjectName" type="text" class="form-control" id="project-name" placeholder="Project Name">
+                                </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button data-dismiss="modal" v-bind:disabled="newProjectName == ''" @click="createProject" type="submit" class="btn btn-default btn-primary">Create</button>
-                        </div>
+                            <div class="modal-footer">
+                                <button data-dismiss="modal" v-bind:disabled="newProjectName == ''" @click="createProject" type="submit" class="btn btn-default btn-primary">Create</button>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -94,21 +97,22 @@
 <script>
     import moment from 'moment'
     export default {
-        data() {
+        data: function() {
             return {
                 projects: null,
                 newTimerName: '',
                 newProjectName: '',
                 activeTimerString: 'Calculating...',
                 counter: { seconds: 0, timer: null },
+
             }
         },
         created() {
-            axios.get('/projects').then(response => {
-                this.projects = response.data
-                axios.get('/project/timers/active').then(response => {
-                    if (response.data.id !== undefined) {
-                        this.startTimer(response.data.project, response.data)
+            axios.get('/projects').then(res => {
+                this.projects = res.data;
+                axios.get('/project/timers/active').then(res => {
+                    if (res.data.id !== undefined) {
+                        this.startTimer(res.data.project, res.data)
                     }
                 })
             })
@@ -134,13 +138,13 @@
             /**
              * Calculate the amount of time spent on the project using the timer object.
              */
-            calculateTimeSpent: function (timer) {
-                if (timer.stopped_at) {
-                    const started = moment(timer.started_at)
-                    const stopped = moment(timer.stopped_at)
+            calculateTimeSpent(timer) {
+                if (timer.stoppedAt) {
+                    const started = moment(new Date(timer.startedAt.timestamp * 1000), "YYYY/MM/DD HH:mm:ss");
+                    const stopped = moment(new Date(timer.stoppedAt.timestamp * 1000), "YYYY/MM/DD HH:mm:ss");
                     const time = this._readableTimeFromSeconds(
                         parseInt(moment.duration(stopped.diff(started)).asSeconds())
-                    )
+                    );
                     return `${time.hours} Hours | ${time.minutes} mins | ${time.seconds} seconds`
                 }
                 return ''
@@ -150,7 +154,7 @@
              * Determines if there is an active timer and whether it belongs to the project
              * passed into the function.
              */
-            showTimerForProject: function (project, timer) {
+            showTimerForProject(project, timer) {
                 return this.counter.timer &&
                     this.counter.timer.id === timer.id &&
                     this.counter.timer.project.id === project.id
@@ -159,14 +163,14 @@
             /**
              * Start counting the timer. Tick tock.
              */
-            startTimer: function (project, timer) {
-                const started = moment(timer.started_at)
+            startTimer(project, timer) {
+                const started = moment(timer.startedAt)
 
-                this.counter.timer = timer
-                this.counter.timer.project = project
-                this.counter.seconds = parseInt(moment.duration(moment().diff(started)).asSeconds())
+                this.counter.timer = timer;
+                this.counter.timer.project = project;
+                this.counter.seconds = parseInt(moment.duration(moment().diff(started)).asSeconds());
                 this.counter.ticker = setInterval(() => {
-                    const time = this._readableTimeFromSeconds(++vm.counter.seconds)
+                    const time = this._readableTimeFromSeconds(++this.counter.seconds);
 
                     this.activeTimerString = `${time.hours} Hours | ${time.minutes}:${time.seconds}`
                 }, 1000)
@@ -175,23 +179,21 @@
             /**
              * Stop the timer from the API and then from the local counter.
              */
-            stopTimer: function () {
+            stopTimer() {
                 axios.post(`/projects/${this.counter.timer.id}/timers/stop`)
-                    .then(response => {
-                        // Loop through the projects and get the right project...
+                    .then(res => {
+                        // Loop through and get the right project...
                         this.projects.forEach(project => {
                             if (project.id === parseInt(this.counter.timer.project.id)) {
-                                // Loop through the timers of the project and set the `stopped_at` time
                                 return project.timers.forEach(timer => {
                                     if (timer.id === parseInt(this.counter.timer.id)) {
-                                        return timer.stopped_at = response.data.stopped_at
+                                        return timer.stoppedAt = res.data.stoppedAt
                                     }
                                 })
                             }
                         });
 
-                        // Stop the ticker
-                        clearInterval(this.counter.ticker)
+                        clearInterval(this.counter.ticker);
 
                         // Reset the counter and timer string
                         this.counter = { seconds: 0, timer: null }
@@ -202,12 +204,12 @@
             /**
              * Create a new timer.
              */
-            createTimer: function (project) {
+            createTimer(project) {
                 axios.post(`/projects/${project.id}/timers`, {name: this.newTimerName})
-                    .then(response => {
-                        project.timers.push(response.data)
-                        this.startTimer(response.data.project, response.data)
-                    })
+                    .then(res => {
+                        project.timers.push(res.data);
+                        this.startTimer(res.data.project, res.data)
+                    });
 
                 this.newTimerName = ''
             },
@@ -215,18 +217,12 @@
             /**
              * Create a new project.
              */
-            createProject: function () {
+            createProject() {
                 axios.post('/projects/create', {name: this.newProjectName})
-                    .then(response => this.projects.push(response.data))
-
-                this.newProjectName = ''
+                    .then(res => {
+                        this.projects.push(res.data)
+                    })
             }
         },
     }
 </script>
-
-<style scoped>
-    #show-timer-for-project {
-        margin-right: 10px
-    }
-</style>

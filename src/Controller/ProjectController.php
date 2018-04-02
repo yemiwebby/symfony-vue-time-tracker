@@ -4,10 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Project;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 class ProjectController extends Controller
@@ -38,41 +43,62 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = $this->projectRepository->findBy(["user" => $this->getUser()]);
+        $projects = $this->projectRepository->findByUser($this->getUser()->getId());
 
-        return $this->json($projects, 200);
+        $jsonContent = $this->serializeObject($projects);
+
+        return new Response($jsonContent, Response::HTTP_OK);
+
     }
+
 
     /**
      * @param Request $request
      * @return Response
-     *
      * @Route("/projects/create", name="create_project")
      */
-    public function store(Request $request)
+    public function saveProjects(Request $request)
     {
-        if ($request->request->has('name')) {
+        $content = json_decode($request->getContent(), true);
 
-            $name = $request->request->get('name');
+        if($content['name']) {
 
             $project = new Project();
-
             $project->setUser($this->getUser());
-            $project->setName($name);
-            $project->setCreatedAt(new DateTime());
-            $project->setUpdatedAt(new DateTime());
-
+            $project->setName($content['name']);
+            $project->setTimers([]);
+            $project->setCreatedAt(new \DateTime());
+            $project->setUpdatedAt(new \DateTime());
             $this->updateDatabase($project);
 
-            return new Response($project, Response::HTTP_OK);
+            // Serialize object into Json format
+            $jsonContent = $this->serializeObject($project);
 
+            return new Response($jsonContent, Response::HTTP_OK);
         }
 
         return new Response('Error', Response::HTTP_NOT_FOUND);
 
     }
 
-    function updateDatabase($object)
+
+    public function serializeObject($object)
+    {
+        $encoders = new JsonEncoder();
+        $normalizers = new ObjectNormalizer();
+
+        $normalizers->setCircularReferenceHandler(function ($obj) {
+            return $obj->getId();
+        });
+        $serializer = new Serializer(array($normalizers), array($encoders));
+
+        $jsonContent = $serializer->serialize($object, 'json');
+
+        return $jsonContent;
+    }
+
+
+    public function updateDatabase($object)
     {
         $this->entityManager->persist($object);
         $this->entityManager->flush();

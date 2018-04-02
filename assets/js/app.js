@@ -1,3 +1,5 @@
+global.jQuery = require('jquery');
+require('bootstrap-sass');
 global.axios = require('axios');
 
 import Vue from 'vue';
