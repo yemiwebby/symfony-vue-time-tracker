@@ -104,7 +104,6 @@
                 newProjectName: '',
                 activeTimerString: 'Calculating...',
                 counter: { seconds: 0, timer: null },
-
             }
         },
         created() {
@@ -194,6 +193,7 @@
                         });
 
                         clearInterval(this.counter.ticker);
+
 
                         // Reset the counter and timer string
                         this.counter = { seconds: 0, timer: null }
